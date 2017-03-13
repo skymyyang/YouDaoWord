@@ -1,6 +1,8 @@
-#encoding=utf-8 
+#encoding=utf-8
 from urllib import error,request
 from bs4 import BeautifulSoup
+from urllib.parse import quote
+from http.client import BadStatusLine
 
 
 class YouDaoSpider(object):
@@ -10,7 +12,7 @@ class YouDaoSpider(object):
     meishiyinbiao=""
     yingshifayin=""
     meishifayin=""
-    cixingshiyi=[] 
+    cixingshiyi=[]
     cizu={}
     liju={}
     xiangguancihui={}
@@ -29,8 +31,27 @@ class YouDaoSpider(object):
         url="http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
         yingurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
         meiurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
-        html=request.urlopen(url) 
-        bs=BeautifulSoup(html,"html.parser")
+        header = {
+        'Host': r'dict.youdao.com',
+        'Connection': 'keep-alive',
+        # 'Accept-Encoding': r'gzip, deflate, sdch',
+        # "Referer":"http://dict.youdao.com/",
+        # "Content-length":19158,
+        'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+        'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0',}
+        # req = request.Request(url, headers=header)
+        req = request.Request(url, headers=header)
+        try:
+            req.selector.encode('ascii')
+        except UnicodeEncodeError:
+            req.selector = quote(req.selector)
+
+        # try:
+        #     htmltest=request.urlopen(req)
+        # except BadStatusLine as e:
+        #     print(e)
+        htmltest = request.urlopen(req)
+        bs=BeautifulSoup(htmltest, "html.parser")
         #获取音标
         try:
             yinbiao=bs.findAll("span",{"class":"pronounce"})
@@ -86,24 +107,3 @@ class YouDaoSpider(object):
         except:
             print("no have fayinyinpin")
         return self
-        
-
-        
-
-            
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-       
-  
