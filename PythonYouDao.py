@@ -9,7 +9,7 @@ from ReadExcel import ReadExcel
 
 
 readExcel=ReadExcel()
-words=readExcel.readsheet("dytest.xlsx")
+words=readExcel.readsheet("wordExcel\dy3.xlsx")
 print(len(words))
 for tmp in words:
     example=YouDaoSpider()
