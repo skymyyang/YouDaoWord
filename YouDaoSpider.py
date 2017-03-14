@@ -29,28 +29,27 @@ class YouDaoSpider(object):
 
     def workSpider(self):
         url="http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
+        urllower = "http://dict.youdao.com/w/"+self.word.lower()+"/#keyfrom=dict2.top"
         yingurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
         meiurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
         header = {
         'Host': r'dict.youdao.com',
         'Connection': 'keep-alive',
-        # 'Accept-Encoding': r'gzip, deflate, sdch',
-        # "Referer":"http://dict.youdao.com/",
-        # "Content-length":19158,
         'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
         'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0',}
-        # req = request.Request(url, headers=header)
         req = request.Request(url, headers=header)
+        #解决短语因ascii的问题无法正常爬取
         try:
             req.selector.encode('ascii')
         except UnicodeEncodeError:
             req.selector = quote(req.selector)
-
-        # try:
-        #     htmltest=request.urlopen(req)
-        # except BadStatusLine as e:
-        #     print(e)
-        htmltest = request.urlopen(req)
+        #解决部分短语因为首字母大写而无法获取网页内容，将其改为小写
+        try:
+            htmltest=request.urlopen(req)
+        except BadStatusLine as e:
+            print(self.word + "-" + str(e))
+            req2 = request.Request(urllower, headers=header)
+            htmltest=request.urlopen(req2)
         bs=BeautifulSoup(htmltest, "html.parser")
         #获取音标
         try:
