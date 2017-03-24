@@ -1,8 +1,9 @@
-#encoding=utf-8
+#coding:utf8
 from urllib import error,request
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from http.client import BadStatusLine
+import re
 
 
 class YouDaoSpider(object):
@@ -31,7 +32,12 @@ class YouDaoSpider(object):
         url="http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
         urllower = "http://dict.youdao.com/w/"+self.word.lower()+"/#keyfrom=dict2.top"
         yingurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
+        yingurllower="http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=1"
         meiurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
+        meiurllower="http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=2"
+        #处理单词和短语之中出现空格和特殊字符，从而导致爬取的mp3文件无法保存
+        wordyp = re.findall('[a-zA-Z0-9]+',self.word)
+        wordyp2 = ''.join(wordyp)
         header = {
         'Host': r'dict.youdao.com',
         'Connection': 'keep-alive',
@@ -96,13 +102,46 @@ class YouDaoSpider(object):
         #获取发音音频
         try:
             data=request.urlopen(yingurl).read()
-            with open("voice\\"+self.word+"ying.mp3","wb") as file:
+            # wordyp = re.findall('[a-zA-Z0-9]+',self.word)
+            # wordyp2 = ''.join(wordyp)
+            with open("voice\\"+wordyp2+"ying.mp3","wb") as file:
                  file.write(data)
-            self.yingshifayin="/voice/"+self.word+"ying.mp3"
+            self.yingshifayin="/voice/"+wordyp2+"ying.mp3"
             data=request.urlopen(meiurl).read()
-            with open("voice\\"+self.word+"mei.mp3","wb") as file:
+            with open("voice\\"+wordyp2+"mei.mp3","wb") as file:
                  file.write(data)
-            self.meishifayin="/voice/"+self.word+"mei.mp3"
-        except:
-            print("no have fayinyinpin")
+            self.meishifayin="/voice/"+wordyp2+"mei.mp3"
+        except BadStatusLine as e:
+            print(self.word + "-" + str(e))
+            data=request.urlopen(yingurllower).read()
+            with open("voice\\"+wordyp2+"ying.mp3","wb") as file:
+                file.write(data)
+            self.yingshifayin="/voice/"+wordyp2+"ying.mp3"
+            data=request.urlopen(meiurllower).read()
+            with open("voice\\"+wordyp2+"mei.mp3","wb") as file:
+                file.write(data)
+            self.meishifayin="/voice/"+wordyp2+"mei.mp3"
+
+
+            # try:
+            #     data=request.urlopen(yingurllower).read()
+            #     with open("voice\\"+wordyp2+"ying.mp3","wb") as file:
+            #          file.write(data)
+            #     self.yingshifayin="/voice/"+wordyp2+"ying.mp3"
+            #     data=request.urlopen(meiurllower).read()
+            #     with open("voice\\"+wordyp2+"mei.mp3","wb") as file:
+            #          file.write(data)
+            #     self.meishifayin="/voice/"+wordyp2+"mei.mp3"
+            # except UnboundLocalError as e:
+            #     data=request.urlopen(yingurllower).read()
+            #     with open("voice\\"+self.word+"ying.mp3","wb") as file:
+            #          file.write(data)
+            #     self.yingshifayin="/voice/"+self.word+"ying.mp3"
+            #     data=request.urlopen(meiurllower).read()
+            #     with open("voice\\"+self.word+"mei.mp3","wb") as file:
+            #          file.write(data)
+            #     self.meishifayin="/voice/"+self.word+"mei.mp3"
+
+
+            #print("no have fayinyinpin")
         return self
