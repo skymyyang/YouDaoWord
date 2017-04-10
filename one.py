@@ -1,46 +1,29 @@
-from urllib import error,request
-from bs4 import BeautifulSoup
-from urllib.parse import quote
-from http.client import BadStatusLine,HTTPConnection
+'''
+cgi默认解析自己根目录下的index.html文件
+cgi.FiledStorage()可以接受到client端请求上来的数据
+get  http请求方式  属于明文请求，将请求的数据以键值对的形式附加到url后面
+post http请求方式，但属于密文请求，不会在url上有所显示
+get  用于我们向服务器提交数据以后获取响应数据
+post 用户我们向服务器提交数据进行保存或校验
+'''
+import cgi
+html = """
 
-def http_get(url, path, headers):
-    conn = HTTPConnection(url, 80)
-    print ('Connecting to ' + url)
-    conn.request(url, path, headers)
-    resp = conn.getresponse()
-    if resp.status<=400:
-        body = resp.read()
-        print ('Reading Source...')
 
-    if resp.status >= 400:
-        print (url)
-        raise ValueError('Response Error: %s, %s, URL: %s' % (resp.status, resp.reason,url))
-    return body
-def workSpider():
-    url="http://dict.youdao.com/w/"+"the Opera House"+"/#keyfrom=dict2.top"
-    yingurl="http://dict.youdao.com/dictvoice?audio="+"the Opera House"+"&type=1"
-    meiurl="http://dict.youdao.com/dictvoice?audio="+"the Opera House"+"&type=2"
-    path = '/'
-    header = {"Host":"dict.youdao.com",
-    # "Referer":"http://dict.youdao.com/",
-    "Content-length":19158,
-    "User-Agent":
-    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/56.0.2924.87 Safari/537.36"}
-    a = http_get(url, path, headers=header)
-    print(a)
-    req = request.Request(url, headers=header)
-    try:
-        req.selector.encode('ascii')
-    except UnicodeEncodeError:
-        req.selector = quote(req.selector)
+<html>
+<head><title>
+hello world
 
-    try:
-        htmltest=request.urlopen(req)
-        print(htmltest.read())
-    except BadStatusLine as e:
-        #pass
-        print(e)
-        # htmltest = request.urlopen(req)
-    # bs=BeautifulSoup(htmltest, "html.parser")
+</title>
+<body>
+hello word this is cgi<br/>
+%s is %s
 
-workSpider()
+</body>
+</head>
+</html>
+"""
+content = cgi.FieldStorage()
+print("content-type: text/html")
+print("\n")
+print(html%content.getvalue("name"))

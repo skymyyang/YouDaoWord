@@ -14,5 +14,10 @@ class ReadExcel:
             self.words.append(sheetInfo.cell(row_index,0).value)
             row_index += 1
         return self.words
-        
 
+
+
+# class Readmp3url:
+#     """读取MP3url"""
+#     MP3url = []
+#     def readsheet1(self, eclpath):

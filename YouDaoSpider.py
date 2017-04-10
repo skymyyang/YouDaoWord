@@ -8,41 +8,42 @@ import re
 
 class YouDaoSpider(object):
     """有道爬虫"""
-    word=""
-    yingshiyinbiao=""
-    meishiyinbiao=""
-    yingshifayin=""
-    meishifayin=""
-    cixingshiyi=[]
-    cizu={}
-    liju={}
-    xiangguancihui={}
+    word = ""
+    yingshiyinbiao = ""
+    meishiyinbiao = ""
+    yingshifayin = ""
+    meishifayin = ""
+    cixingshiyi = []
+    cizu = {}
+    liju = {}
+    xiangguancihui = {}
     def __init__(self, **kwargs):
-        self.word=""
-        self.meishifayin=""
-        self.yingshifayin=""
-        self.meishiyinbiao=""
-        self.yingshiyinbiao=""
-        self.cixingshiyi=[]
-        self.cizu={}
-        self.liju={}
-        self.xiangguancihui={}
+        self.word = ""
+        self.meishifayin = ""
+        self.yingshifayin = ""
+        self.meishiyinbiao = ""
+        self.yingshiyinbiao = ""
+        self.cixingshiyi = []
+        self.cizu = {}
+        self.liju = {}
+        self.xiangguancihui = {}
 
     def workSpider(self):
-        url="http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
+        url = "http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
         urllower = "http://dict.youdao.com/w/"+self.word.lower()+"/#keyfrom=dict2.top"
-        yingurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
-        yingurllower="http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=1"
-        meiurl="http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
-        meiurllower="http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=2"
+        yingurl = "http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
+        yingurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=1"
+        meiurl = "http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
+        meiurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=2"
         #处理单词和短语之中出现空格和特殊字符，从而导致爬取的mp3文件无法保存
-        wordyp = re.findall('[a-zA-Z0-9]+',self.word)
+        wordyp = re.findall('[a-zA-Z0-9" "]+', self.word)
         wordyp2 = ''.join(wordyp)
         header = {
-        'Host': r'dict.youdao.com',
-        'Connection': 'keep-alive',
-        'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-        'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0',}
+            'Host': r'dict.youdao.com',
+            'Connection': 'keep-alive',
+            'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0',
+            }
         req = request.Request(url, headers=header)
         #解决短语因ascii的问题无法正常爬取
         try:
@@ -51,15 +52,15 @@ class YouDaoSpider(object):
             req.selector = quote(req.selector)
         #解决部分短语因为首字母大写而无法获取网页内容，将其改为小写
         try:
-            htmltest=request.urlopen(req)
+            htmltest = request.urlopen(req)
         except BadStatusLine as e:
             print(self.word + "-" + str(e))
             req2 = request.Request(urllower, headers=header)
-            htmltest=request.urlopen(req2)
-        bs=BeautifulSoup(htmltest, "html.parser")
+            htmltest = request.urlopen(req2)
+        bs = BeautifulSoup(htmltest, "html.parser")
         #获取音标
         try:
-            yinbiao=bs.findAll("span",{"class":"pronounce"})
+            yinbiao = bs.findAll("span",{"class":"pronounce"})
             for tmp in yinbiao:
                     if("英" in tmp.text):
                         self.yingshiyinbiao=tmp.find("span",{"class":"phonetic"}).text
@@ -71,7 +72,7 @@ class YouDaoSpider(object):
         try:
             jieshi=bs.find("div",{"class":"trans-container"}).find("ul").findAll("li")
             for tmp in jieshi:
-                self.cixingshiyi.append("{"+tmp.text.split('.')[0]+":"+tmp.text.replace(tmp.text.split('.')[0]+".",'')+"}")
+                self.cixingshiyi.append("{"+tmp.text.split('.')[0].strip()+":"+tmp.text.replace(tmp.text.split('.')[0]+".",'').strip()+"}")
         except:
             print("no have cixingjieshi")
         #获取词组
@@ -96,7 +97,12 @@ class YouDaoSpider(object):
         try:
             lijutmp=bs.find("div",{"id":"bilingual"}).ul.findAll("li")
             for tmp in lijutmp:
-                self.liju.setdefault(tmp.p.text,tmp.p.next_sibling.next_sibling.text)
+                if tmp.p.text.strip() != "":
+                    self.liju.setdefault(tmp.p.text.strip(),tmp.p.next_sibling.next_sibling.text.strip())
+
+
+
+
         except:
             print("no have liju")
         #获取发音音频
