@@ -4,12 +4,8 @@ import json
 from MysqlHelper import MysqlHelper
 from ReadExcel import ReadExcel
 
-
-
-
-
 readExcel=ReadExcel()
-words=readExcel.readsheet("wordExcel\dy04.xlsx")
+words=readExcel.readsheet("wordExcel\\w20170814.xlsx")
 print(len(words))
 for tmp in words:
     example=YouDaoSpider()

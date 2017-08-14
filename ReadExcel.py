@@ -1,5 +1,5 @@
 from xlrd import open_workbook
-import re
+
 
 
 class ReadExcel:

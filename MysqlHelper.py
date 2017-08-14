@@ -8,7 +8,7 @@ class MysqlHelper:
 
     @staticmethod
     def insert(word,asymbol,esymbol,explain,cizu,liju,xiangguancihui,aspoken,espoken):
-        db=pymysql.connect(host="mfgskymyyang.chinacloudapp.cn",user="skymyyang",password="666666",db="metest",charset="utf8")
+        db=pymysql.connect(host="192.168.180.187",user="root",password="123456",db="lytest",charset="utf8")
         cursor=db.cursor()
         print(word.encode("utf8"))
         print("--------------------------------insert into mysql db")
