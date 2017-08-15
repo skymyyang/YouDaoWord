@@ -5,7 +5,7 @@ from MysqlHelper import MysqlHelper
 from ReadExcel import ReadExcel
 
 readExcel=ReadExcel()
-words=readExcel.readsheet("wordExcel\\w20170814.xlsx")
+words=readExcel.readsheet("wordExcel\\word20170815sec.xlsx")
 print(len(words))
 for tmp in words:
     example=YouDaoSpider()

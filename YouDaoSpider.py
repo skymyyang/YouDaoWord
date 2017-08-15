@@ -29,15 +29,17 @@ class YouDaoSpider(object):
         self.xiangguancihui = {}
 
     def workSpider(self):
-        url = "http://dict.youdao.com/w/"+self.word+"/#keyfrom=dict2.top"
-        urllower = "http://dict.youdao.com/w/"+self.word.lower()+"/#keyfrom=dict2.top"
-        yingurl = "http://dict.youdao.com/dictvoice?audio="+self.word+"&type=1"
-        yingurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=1"
-        meiurl = "http://dict.youdao.com/dictvoice?audio="+self.word+"&type=2"
-        meiurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.lower()+"&type=2"
+        # self.word = self.word.replace
+        url = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"/#keyfrom=dict2.top"
+        urllower = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"/#keyfrom=dict2.top"
+        yingurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"&type=1"
+        yingurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"&type=1"
+        meiurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"&type=2"
+        meiurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"&type=2"
         #处理单词和短语之中出现空格和特殊字符，从而导致爬取的mp3文件无法保存
-        wordyp = re.findall('[a-zA-Z0-9" "]+', self.word)
+        wordyp = re.findall('[a-zA-Z0-9" "éï]+', self.word)
         wordyp2 = ''.join(wordyp)
+        wordyp2 = wordyp2.replace('é','-').replace('ï','-')
         header = {
             'Host': r'dict.youdao.com',
             'Connection': 'keep-alive',
