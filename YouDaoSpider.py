@@ -3,6 +3,13 @@ from urllib import error,request
 from bs4 import BeautifulSoup
 from urllib.parse import quote
 from http.client import BadStatusLine
+import time
+import requests
+#"http://youdao.com/w/eng/ch%C3%A2teau/#keyfrom=dict2.index"
+#"http://youdao.com/w/f%C3%AAte/#keyfrom=dict2.top"
+# http://youdao.com/w/eng/vis-%C3%A0-vis/#keyfrom=dict2.index
+# http://youdao.com/w/eng/El%20Ni%C3%B1o/#keyfrom=dict2.index
+
 import re
 
 
@@ -29,22 +36,21 @@ class YouDaoSpider(object):
         self.xiangguancihui = {}
 
     def workSpider(self):
-        # self.word = self.word.replace
-        url = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"/#keyfrom=dict2.top"
-        urllower = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"/#keyfrom=dict2.top"
-        yingurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"&type=1"
-        yingurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"&type=1"
-        meiurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF')+"&type=2"
-        meiurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').lower()+"&type=2"
+        url = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(" ", "%20")+"/#keyfrom=dict2.top"
+        urllower = "http://dict.youdao.com/w/"+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(" ", "%20").lower()+"/#keyfrom=dict2.top"
+        yingurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(" ", "%20")+"&type=1"
+        yingurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(' ', '+').replace(" ", "%20").lower()+"&type=1"
+        meiurl = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(" ", "%20")+"&type=2"
+        meiurllower = "http://dict.youdao.com/dictvoice?audio="+self.word.replace('é','%C3%A9').replace('ï','%C3%AF').replace('â', '%C3%A2').replace('ê', '%C3%AA').replace('à', '%C3%A0').replace('ñ', '%C3%B1').replace(' ', '+').replace(" ", "%20").lower()+"&type=2"
         #处理单词和短语之中出现空格和特殊字符，从而导致爬取的mp3文件无法保存
-        wordyp = re.findall('[a-zA-Z0-9" "éï]+', self.word)
+        wordyp = re.findall('[a-zA-Z0-9" "éïâàñê]+', self.word)
         wordyp2 = ''.join(wordyp)
-        wordyp2 = wordyp2.replace('é','-').replace('ï','-')
+        wordyp2 = wordyp2.replace('é','-').replace('ï','-').replace('â', '-').replace('à', '-').replace('ñ', '-').replace('ê', '-')
+        print(url)
         header = {
             'Host': r'dict.youdao.com',
             'Connection': 'keep-alive',
-            'Accept': r'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:52.0) Gecko/20100101 Firefox/52.0',
+            'User-Agent': r'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/65.0.3325.181 Safari/537.36',
             }
         req = request.Request(url, headers=header)
         #解决短语因ascii的问题无法正常爬取
@@ -55,10 +61,24 @@ class YouDaoSpider(object):
         #解决部分短语因为首字母大写而无法获取网页内容，将其改为小写
         try:
             htmltest = request.urlopen(req)
+        except error.HTTPError as e:
+            print(self.word + "-" + str(e))
+            print(type(e.code))
+            if e.code == 400:
+                res = request.Request(url, headers=header)
+                print(res)
+                htmltest = request.urlopen(res)
+            else:
+                time.sleep(1)
+                htmltest = request.urlopen(req)
         except BadStatusLine as e:
             print(self.word + "-" + str(e))
             req2 = request.Request(urllower, headers=header)
             htmltest = request.urlopen(req2)
+        # except error.HTTPError as e:
+        #     print(self.word + "-" + str(e))
+        #     time.sleep(1)
+        #     htmltest = request.urlopen(req)
         bs = BeautifulSoup(htmltest, "html.parser")
         #获取音标
         try:
@@ -110,8 +130,6 @@ class YouDaoSpider(object):
         #获取发音音频
         try:
             data=request.urlopen(yingurl).read()
-            # wordyp = re.findall('[a-zA-Z0-9]+',self.word)
-            # wordyp2 = ''.join(wordyp)
             with open("voice\\"+wordyp2+"ying.mp3","wb") as file:
                  file.write(data)
             self.yingshifayin="/voice/"+wordyp2+"ying.mp3"
@@ -151,5 +169,5 @@ class YouDaoSpider(object):
             #     self.meishifayin="/voice/"+self.word+"mei.mp3"
 
 
-            #print("no have fayinyinpin")
+        print("no have fayinyinpin")
         return self

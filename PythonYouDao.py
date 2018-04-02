@@ -3,9 +3,9 @@ from YouDaoSpider import YouDaoSpider
 import json
 from MysqlHelper import MysqlHelper
 from ReadExcel import ReadExcel
-
+# "http://www.iciba.com/fight%20fires"
 readExcel=ReadExcel()
-words=readExcel.readsheet("wordExcel\\word20170815sec.xlsx")
+words=readExcel.readsheet("wordExcel\\word20180329.xlsx")
 print(len(words))
 for tmp in words:
     example=YouDaoSpider()
